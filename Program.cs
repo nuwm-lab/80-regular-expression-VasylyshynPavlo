@@ -11,8 +11,32 @@ namespace LabWork
     {
         static void Main(string[] args)
         {
-            
-            Console.WriteLine("Hello World!");
+            const string patterns = @"^(https?:\/\/)?([a-z\d][a-z\d\.-]*)\.([a-z\.]{2,6})([\/\w\.\-?=&%#]*)*\/?$";
+            string[] text = {
+                "https://www.example.com",
+                "http://subdomain.example.co.uk/path/to/resource",
+                "www.example.com",
+                "example",
+                "https://example.com?query=param",
+                "ftp://example.com/resource",
+                "https://example..com",
+                "https://-example.com",
+                "https://example.com/path with spaces",
+                "https://example.com/#fragment"
+            };
+            Console.WriteLine("Text to validate URLs:");
+            foreach (var line in text)
+            {
+                Console.WriteLine(line);
+            }
+            Console.WriteLine("Valid URLs:");
+            foreach (var line in text)
+            {
+                if (System.Text.RegularExpressions.Regex.IsMatch(line, patterns))
+                {
+                    Console.WriteLine(line);
+                }
+            }
         }
     }
 }
