@@ -1,41 +1,65 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace LabWork
 {
-    // Даний проект є шаблоном для виконання лабораторних робіт
-    // з курсу "Об'єктно-орієнтоване програмування та патерни проектування"
-    // Необхідно змінювати і дописувати код лише в цьому проекті
-    // Відео-інструкції щодо роботи з github можна переглянути 
-    // за посиланням https://www.youtube.com/@ViktorZhukovskyy/videos 
     class Program
     {
         static void Main(string[] args)
         {
-            const string patterns = @"^(https?:\/\/)?([a-z\d][a-z\d\.-]*)\.([a-z\.]{2,6})([\/\w\.\-?=&%#]*)*\/?$";
-            string[] text = {
-                "https://www.example.com",
-                "http://subdomain.example.co.uk/path/to/resource",
-                "www.example.com",
-                "example",
-                "https://example.com?query=param",
-                "ftp://example.com/resource",
-                "https://example..com",
-                "https://-example.com",
-                "https://example.com/path with spaces",
-                "https://example.com/#fragment"
-            };
-            Console.WriteLine("Text to validate URLs:");
-            foreach (var line in text)
+            const string urlPattern = @"\b(?:(?:https?|ftp)://|www\.)[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z]{2,})+(?:[/?#][^\s]*)?\b";
+
+            string textToSearch = @"
+Here are a few test strings:
+Valid: https://www.example.com and http://subdomain.example.co.uk/path/to/resource
+Also valid: https://example.com?query=param and https://example.com/#fragment
+This one should also be found: www.example.com (without http).
+Link to the video: https://www.youtube.com/@ViktorZhukovskyy/videos
+
+Invalid or incomplete:
+This is just example, and this is ftp://example.com/resource (ftp will be found).
+Erroneous: https://example..com or https://-example.com
+URL with a space: 'https://example.com/path with spaces' (will only find the first part).
+";
+
+            Console.WriteLine("--- Text to search URLs in: ---");
+            Console.WriteLine(textToSearch);
+            Console.WriteLine("---------------------------------");
+
+            ExtractUrls(textToSearch, urlPattern);
+        }
+        
+        private static void ExtractUrls(string text, string pattern)
+        {
+            Console.WriteLine("Found URLs:");
+
+            try
             {
-                Console.WriteLine(line);
-            }
-            Console.WriteLine("Valid URLs:");
-            foreach (var line in text)
-            {
-                if (System.Text.RegularExpressions.Regex.IsMatch(line, patterns))
+                MatchCollection matches = Regex.Matches(text, pattern, 
+                    RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+                if (matches.Count == 0)
                 {
-                    Console.WriteLine(line);
+                    Console.WriteLine("No valid URLs found.");
+                    return;
                 }
+
+                foreach (Match match in matches)
+                {
+                    Console.WriteLine(match.Value);
+                }
+            }
+            catch (RegexMatchTimeoutException ex)
+            {
+                Console.WriteLine($"Error: The regex operation timed out. {ex.Message}");
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine($"Error: Invalid regex pattern. {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
             }
         }
     }
